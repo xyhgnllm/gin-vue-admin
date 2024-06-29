@@ -1,0 +1,34 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每6小时运行一次
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout fork
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Fetch upstream
+      run: |
+        git remote add upstream https://github.com/original-owner/original-repository.git
+        git fetch upstream
+
+    - name: Merge upstream
+      run: |
+        git merge upstream/main --no-edit
+
+    - name: Push changes
+      run: |
+        git push origin main
